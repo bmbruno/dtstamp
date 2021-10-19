@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using ExifLibrary;
+using ParamParser;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
@@ -16,7 +17,7 @@ namespace DTStamp
             // TODO: Add pretty welcome graphic and set up formatting
 
             string workingDirectory = Directory.GetCurrentDirectory();
-            string outputDirectory = $"{workingDirectory}/output/";
+            string outputDirectory = string.Empty;
             string fontPath = "impact.ttf";
             int fontSize = 96;
             List<string> validFileTypes = new List<string>() { ".jpg", ".jpeg", ".png" };            
@@ -24,11 +25,12 @@ namespace DTStamp
             FontCollection fontCollection = new FontCollection();
             FontFamily fontFamily;
             Font font = null;
+            Parser parser = new Parser(args);
 
             // Set working directory to another path if provided via arguments
-            if (args.Length == 1)
+            if (parser.HasParam("path"))
             {
-                workingDirectory = args[0].Trim();
+                workingDirectory = parser.GetParam("path").Trim();
 
                 // Verify directory exists
                 if (!Directory.Exists(workingDirectory))
@@ -38,12 +40,21 @@ namespace DTStamp
                 }
             }
 
-            // Prepare output directory
-            if (Directory.Exists(outputDirectory))
+            if (parser.HasParam("size"))
             {
-                Directory.Delete(outputDirectory, true);
-                Directory.CreateDirectory(outputDirectory);
+                if(!Int32.TryParse(parser.GetParam("size").Trim(), out fontSize))
+                {
+                    Console.WriteLine($"Could not parse 'size' param; defaulting fontSize to {fontSize}.");
+                }
             }
+
+            // Prepare output directory
+            outputDirectory = $"{workingDirectory}/output/";
+
+            if (Directory.Exists(outputDirectory))
+                Directory.Delete(outputDirectory, true);
+
+            Directory.CreateDirectory(outputDirectory);
 
             // Prep fonts
             try
@@ -90,7 +101,7 @@ namespace DTStamp
 
                     using (Image image = Image.Load(path: file))
                     {
-                        image.Mutate(x => x.DrawText(text, font, Brushes.Solid(Color.Yellow), Pens.Solid(Color.Black, 3), new PointF(20, 20)));
+                        image.Mutate(x => x.DrawText(text, font, Brushes.Solid(Color.Yellow), Pens.Solid(Color.Black, (fontSize / 20)), new PointF(20, 20)));
                         image.SaveAsJpeg(outputDirectory + Path.GetFileName(file));
                     }
 
