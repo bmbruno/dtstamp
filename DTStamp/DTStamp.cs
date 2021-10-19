@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using ExifLibrary;
 using ParamParser;
 using SixLabors.Fonts;
@@ -15,10 +16,14 @@ namespace DTStamp
         static void Main(string[] args)
         {
             // TODO: Add pretty welcome graphic and set up formatting
+            Console.WriteLine("#############################");
+            Console.WriteLine("     Welcome to DTStamp!");
+            Console.WriteLine("#############################");
+            Console.Write(Environment.NewLine);
 
             string workingDirectory = Directory.GetCurrentDirectory();
             string outputDirectory = string.Empty;
-            string fontPath = "impact.ttf";
+            string fontPath = "dtstamp.ttf";
             int fontSize = 96;
             List<string> validFileTypes = new List<string>() { ".jpg", ".jpeg", ".png" };            
             List<string> imageFiles = new List<string>();
@@ -27,7 +32,7 @@ namespace DTStamp
             Font font = null;
             Parser parser = new Parser(args);
 
-            // Set working directory to another path if provided via arguments
+            // Handle program parameters
             if (parser.HasParam("path"))
             {
                 workingDirectory = parser.GetParam("path").Trim();
@@ -48,13 +53,27 @@ namespace DTStamp
                 }
             }
 
+            if (parser.Parameters.Count == 0)
+            {
+                Console.WriteLine("Available parameters:");
+                Console.WriteLine(" -path : Absolute path to a folder containing images to be stamped; default is current directory of the executable.");
+                Console.WriteLine($" -size : font size (pt) of datetime stamp on images; default is {fontSize}.");
+                Console.Write(Environment.NewLine);
+            }
+
             // Prepare output directory
-            outputDirectory = $"{workingDirectory}/output/";
+            outputDirectory = $"{workingDirectory}\\output\\";
 
             if (Directory.Exists(outputDirectory))
                 Directory.Delete(outputDirectory, true);
 
             Directory.CreateDirectory(outputDirectory);
+
+            // Output information about this execition
+            Console.WriteLine($"PATH:      {workingDirectory}");
+            Console.WriteLine($"OUTPUT:    {outputDirectory}");
+            Console.WriteLine($"FONT SIZE: {fontSize}");
+            Console.Write(Environment.NewLine);
 
             // Prep fonts
             try
