@@ -1,3 +1,7 @@
-## 1.0.0.0
+## 1.0.1
 
-* Initial release
+ * Added 'quality' parameter to set the JPG encoding quality
+
+## 1.0.0
+
+ * Initial release
