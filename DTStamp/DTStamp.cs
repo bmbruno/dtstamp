@@ -118,7 +118,7 @@ namespace DTStamp
                     ExifDateTime dateTime = exifData.Properties.Get<ExifDateTime>(ExifTag.DateTimeOriginal);
                     Console.WriteLine($"[IMAGE] {fileName} [EXIF DATETIME] {dateTime.ToString()}");
 
-                    string text = $" {dateTime.Value.ToString("yyyy-MM-dd")}  {dateTime.Value.ToShortTimeString()}";
+                    string text = $"{dateTime.Value.ToString("yyyy-MM-dd")}  {dateTime.Value.ToShortTimeString()}";
 
                     using (Image image = Image.Load(path: file))
                     {
