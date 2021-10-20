@@ -101,8 +101,13 @@ namespace DTStamp
             // Ensure images exist in directory
             if (imageFiles.Count == 0)
             {
-                Console.WriteLine($"No image files found at path {workingDirectory}.");
+                Console.WriteLine($"No image files found at path {workingDirectory}");
                 Console.WriteLine($"Supported image types: JPG, JPEG, PNG");
+
+                // No work to do, clean up output directory
+                if (Directory.Exists(outputDirectory))
+                    Directory.Delete(outputDirectory);
+
                 Environment.Exit(-1);
             }
 
