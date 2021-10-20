@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using ExifLibrary;
 using ParamParser;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Processing;
+using System.Reflection;
 
 namespace DTStamp
 {
@@ -15,12 +15,12 @@ namespace DTStamp
     {
         static void Main(string[] args)
         {
-            // TODO: Add pretty welcome graphic and set up formatting
-            Console.WriteLine("#############################");
-            Console.WriteLine("     Welcome to DTStamp!");
-            Console.WriteLine("#############################");
+            Console.WriteLine($"#############################");
+            Console.WriteLine($"     Welcome to DTStamp!");
+            Console.WriteLine($"#############################");
+            Console.WriteLine($"Version: {Assembly.GetEntryAssembly().GetName().Version}");
             Console.Write(Environment.NewLine);
-
+            
             string workingDirectory = Directory.GetCurrentDirectory();
             string outputDirectory = string.Empty;
             string fontPath = "dtstamp.ttf";
@@ -109,12 +109,14 @@ namespace DTStamp
             // Iterate over each list and timestamp images
             foreach (string file in imageFiles)
             {
+                string fileName = Path.GetFileName(file);
+
                 try
                 {
                     // Load EXIF data
                     ImageFile exifData = ImageFile.FromFile(file);
                     ExifDateTime dateTime = exifData.Properties.Get<ExifDateTime>(ExifTag.DateTimeOriginal);
-                    Console.WriteLine($"[IMAGE] {Path.GetFileName(file)} [EXIF DATETIME] {dateTime.ToString()}");
+                    Console.WriteLine($"[IMAGE] {fileName} [EXIF DATETIME] {dateTime.ToString()}");
 
                     string text = $" {dateTime.Value.ToString("yyyy-MM-dd")}  {dateTime.Value.ToShortTimeString()}";
 
@@ -126,9 +128,8 @@ namespace DTStamp
 
                 }
                 catch (Exception exc)
-                {
-                    // TODO: add detail: iamge filename
-                    Console.WriteLine($"EXCEPTION: {exc.Message.ToString()}");
+                {                    
+                    Console.WriteLine($"EXCEPTION processing {fileName}: {exc.Message.ToString()}");
                 }
             }
         }
