@@ -1,6 +1,6 @@
 # About
 
-Version: 1.0.0.0
+Version: 1.0.1.0
 
 DTStamp is a .NET 5 CLI utility for adding a date/time stamp to images in a single folder. Supported image types include JPG, JPEG, PNG.
 
@@ -32,6 +32,7 @@ Available parameters when running `dtstamp.exe`:
 
  * `-path`: absolute path to the image source folder; defaults to current directory of executable if not provided
  * `-size`: font size (pt) of date & time stamp on images
+ * `-quality` : jpeg encoding quality (0 - 100)
 
 ## Custom fonts
 

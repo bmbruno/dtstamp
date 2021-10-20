@@ -8,6 +8,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Processing;
 using System.Reflection;
+using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace DTStamp
 {
@@ -20,17 +21,22 @@ namespace DTStamp
             Console.WriteLine($"#############################");
             Console.WriteLine($"Version: {Assembly.GetEntryAssembly().GetName().Version}");
             Console.Write(Environment.NewLine);
-            
-            string workingDirectory = Directory.GetCurrentDirectory();
-            string outputDirectory = string.Empty;
+
+            // Configuration
             string fontPath = "dtstamp.ttf";
             int fontSize = 96;
-            List<string> validFileTypes = new List<string>() { ".jpg", ".jpeg", ".png" };            
+            int jpgEncodingQuality = 75;
+            List<string> validFileTypes = new List<string>() { ".jpg", ".jpeg", ".png" };
+
+            // Working variables
+            string workingDirectory = Directory.GetCurrentDirectory();
+            string outputDirectory = string.Empty;     
             List<string> imageFiles = new List<string>();
             FontCollection fontCollection = new FontCollection();
             FontFamily fontFamily;
             Font font = null;
             Parser parser = new Parser(args);
+            JpegEncoder jpgEncoder;
 
             // Handle program parameters
             if (parser.HasParam("path"))
@@ -53,11 +59,29 @@ namespace DTStamp
                 }
             }
 
+            if (parser.HasParam("quality"))
+            {
+                if (Int32.TryParse(parser.GetParam("quality").Trim(), out jpgEncodingQuality))
+                {
+                    if (jpgEncodingQuality < 0 || jpgEncodingQuality > 100)
+                    {
+                        Console.WriteLine("'quality' parameter must be between 0 and 100.");
+                        Environment.Exit(-1);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("'quality' parameter must be an integer between 0 and 100.");
+                    Environment.Exit(-1);
+                }
+            }
+
             if (parser.Parameters.Count == 0)
             {
                 Console.WriteLine("Available parameters:");
-                Console.WriteLine(" -path : Absolute path to a folder containing images to be stamped; default is current directory of the executable.");
+                Console.WriteLine($" -path : Absolute path to a folder containing images to be stamped; default is current directory of the executable.");
                 Console.WriteLine($" -size : font size (pt) of datetime stamp on images; default is {fontSize}.");
+                Console.WriteLine($" -quality : jpeg encoding quality (0 - 100); default is {jpgEncodingQuality}.");
                 Console.Write(Environment.NewLine);
             }
 
@@ -73,6 +97,7 @@ namespace DTStamp
             Console.WriteLine($"PATH:      {workingDirectory}");
             Console.WriteLine($"OUTPUT:    {outputDirectory}");
             Console.WriteLine($"FONT SIZE: {fontSize}");
+            Console.WriteLine($"QUALITY:   {jpgEncodingQuality}");
             Console.Write(Environment.NewLine);
 
             // Prep fonts
@@ -111,6 +136,9 @@ namespace DTStamp
                 Environment.Exit(-1);
             }
 
+            // Set up encoder
+            jpgEncoder = new JpegEncoder() { Quality = jpgEncodingQuality };
+
             // Iterate over each list and timestamp images
             foreach (string file in imageFiles)
             {
@@ -128,7 +156,7 @@ namespace DTStamp
                     using (Image image = Image.Load(path: file))
                     {
                         image.Mutate(x => x.DrawText(text, font, Brushes.Solid(Color.Yellow), Pens.Solid(Color.Black, (fontSize / 20)), new PointF(20, 20)));
-                        image.SaveAsJpeg(outputDirectory + Path.GetFileName(file));
+                        image.SaveAsJpeg(outputDirectory + Path.GetFileName(file), jpgEncoder);
                     }
 
                 }
