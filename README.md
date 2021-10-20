@@ -34,6 +34,12 @@ Available parameters when running `dtstamp.exe`:
  * `-size`: font size (pt) of date & time stamp on images
  * `-quality` : jpeg encoding quality (0 - 100)
 
+Example of parameter usage:
+
+```
+dtstamp.exe -path 'c:\images' -size 128 -quality 55
+```
+
 ## Custom fonts
 
 The font file `dtstamp.ttf` represents the font used for timestamps on images. You can replace this with a font of your choice by naming a True Type Font file `dtstamp.ttf` and placing next to the executable (`dtstamp.exe`).
