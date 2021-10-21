@@ -26,7 +26,7 @@ namespace DTStamp
             string fontPath = "dtstamp.ttf";
             int fontSize = 96;
             int jpgEncodingQuality = 75;
-            List<string> validFileTypes = new List<string>() { ".jpg", ".jpeg", ".png" };
+            List<string> validFileTypes = new List<string>() { ".jpg", ".jpeg" };
 
             // Working variables
             string workingDirectory = Directory.GetCurrentDirectory();
@@ -37,6 +37,7 @@ namespace DTStamp
             Font font = null;
             Parser parser = new Parser(args);
             JpegEncoder jpgEncoder;
+            int countFound, countProcessed = 0;
 
             // Handle program parameters
             if (parser.HasParam("path"))
@@ -127,7 +128,7 @@ namespace DTStamp
             if (imageFiles.Count == 0)
             {
                 Console.WriteLine($"No image files found at path {workingDirectory}");
-                Console.WriteLine($"Supported image types: JPG, JPEG, PNG");
+                Console.WriteLine($"Supported image types: JPG");
 
                 // No work to do, clean up output directory
                 if (Directory.Exists(outputDirectory))
@@ -135,6 +136,8 @@ namespace DTStamp
 
                 Environment.Exit(-1);
             }
+
+            countFound = imageFiles.Count;
 
             // Set up encoder
             jpgEncoder = new JpegEncoder() { Quality = jpgEncodingQuality };
@@ -149,22 +152,38 @@ namespace DTStamp
                     // Load EXIF data
                     ImageFile exifData = ImageFile.FromFile(file);
                     ExifDateTime dateTime = exifData.Properties.Get<ExifDateTime>(ExifTag.DateTimeOriginal);
-                    Console.WriteLine($"[IMAGE] {fileName} [EXIF DATETIME] {dateTime.ToString()}");
 
-                    string text = $"{dateTime.Value.ToString("yyyy-MM-dd")}  {dateTime.Value.ToShortTimeString()}";
-
-                    using (Image image = Image.Load(path: file))
+                    if (dateTime != null)
                     {
-                        image.Mutate(x => x.DrawText(text, font, Brushes.Solid(Color.Yellow), Pens.Solid(Color.Black, (fontSize / 20)), new PointF(20, 20)));
-                        image.SaveAsJpeg(outputDirectory + Path.GetFileName(file), jpgEncoder);
-                    }
 
+                        Console.WriteLine($"[IMAGE] {fileName} [EXIF DATETIME] {dateTime.ToString()}");
+                        string text = $"{dateTime.Value.ToString("yyyy-MM-dd")}  {dateTime.Value.ToShortTimeString()}";
+
+                        using (Image image = Image.Load(path: file))
+                        {
+                            image.Mutate(x => x.DrawText(text, font, Brushes.Solid(Color.Yellow), Pens.Solid(Color.Black, (fontSize / 20)), new PointF(20, 20)));
+                            image.SaveAsJpeg(outputDirectory + Path.GetFileName(file), jpgEncoder);
+                            countProcessed += 1;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"ERROR: could not load EXIF data (DateTimeOriginal) for image: {fileName}");
+                    }
                 }
                 catch (Exception exc)
                 {                    
                     Console.WriteLine($"EXCEPTION processing {fileName}: {exc.Message.ToString()}");
                 }
             }
+
+            Console.Write(Environment.NewLine);
+            Console.WriteLine($"#############################");
+            Console.WriteLine($"          COMPLETE!          ");
+            Console.Write(Environment.NewLine);
+            Console.WriteLine($" Images found:     {countFound}");
+            Console.WriteLine($" Images processed: {countProcessed}");
+            Console.WriteLine($"#############################");
         }
     }
 }
